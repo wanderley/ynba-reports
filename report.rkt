@@ -7,25 +7,25 @@
 ;;
 ;; Example of report:
 ;;
-;;     *Maiores saídas:*
+;;     *Top outflow transactions:*
 ;;     - G1 = $1000
 ;;       - C1 = $300
 ;;       - C2 = $600
 ;;       - C3 = $80
-;;       - Outras = $20
+;;       - Others = $20
 ;;     - G2 = $1000
 ;;       - C1 = $300
 ;;       - C2 = $600
 ;;       - C3 = $80
-;;       - Outras = $20
+;;       - Others = $20
 ;;     - G3 = $1000
 ;;       - C1 = $300
 ;;       - C2 = $600
 ;;       - C3 = $80
-;;       - Outras = $20
-;;     - Outros = $1000
+;;       - Others = $20
+;;     - Others = $1000
 ;;
-;;     *Maiores entradas:*
+;;     *Inflow transactions:*
 ;;     - G1: C1 = $300
 ;;     - G2: C1 = $80
 
