@@ -36,7 +36,10 @@
 
 (define (csv->transactions csv)
   (for/list ([line (rest csv)])
-    (transaction (list-ref line 5) (list-ref line 6) (list-ref line 8) (list-ref line 9))))
+    (transaction (list-ref line 5)
+                 (list-ref line 6)
+                 (string->number (string-replace (list-ref line 8) "$" ""))
+                 (string->number (string-replace (list-ref line 9) "$" "")))))
 
 (csv->transactions
  (read-csv "example.csv"))
