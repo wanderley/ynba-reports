@@ -30,6 +30,15 @@
 
 (struct transaction [group category outflow inflow] #:transparent)
 
+(module+ test
+  (define T1 (list (transaction "G2" "C1" 15.0 0.0)
+                   (transaction "G1" "C1" 10.0 0.0)
+                   (transaction "G3" "C1"  0.0 7.0)
+                   (transaction "G4" "C2"  1.0 0.0)
+                   (transaction "G4" "C2"  0.0 1.0)
+                   (transaction "G5" "C3"  0.0 5.0)
+                   (transaction "G2" "C1" 15.0 0.0))))
+
 (define (read-csv path)
   (define content (port->string (open-input-file path)))
   (for/list ([line (string-split content "\n")])
@@ -44,13 +53,7 @@
                  (string->number (string-replace (list-ref line 9) "$" "")))))
 
 (module+ test
-  (check-equal? (aggregate-outflow (list (transaction "G2" "C1" 15.0 0.0)
-                                         (transaction "G1" "C1" 10.0 0.0)
-                                         (transaction "G3" "C1"  0.0 7.0)
-                                         (transaction "G4" "C2"  1.0 0.0)
-                                         (transaction "G4" "C2"  0.0 1.0)
-                                         (transaction "G5" "C3"  0.0 5.0)
-                                         (transaction "G2" "C1" 15.0 0.0)))
+  (check-equal? (aggregate-outflow T1)
                 '(("G2" . 30.0) ("G1" . 10.0) ("G4" . 1.0))))
 (define (aggregate-outflow ts)
   (sort
@@ -73,6 +76,20 @@
       [else
        (cons (list t) groups)])))
 
-(aggregate-outflow
- (csv->transactions
-  (read-csv "example.csv")))
+(module+ test
+  (check-equal? (report T1)
+                (string-join '("*Top outflow transactions:*"
+                               "- G2 = $30.0"
+                               "- G1 = $10.0"
+                               "- G4 = $1.0")
+                             "\n")))
+(define (report ts)
+  (string-join
+   (cons "*Top outflow transactions:*"
+         (for/list ([g (aggregate-outflow ts)])
+           (format "- ~a = $~a" (car g) (cdr g))))
+   "\n"))
+
+(displayln (report
+            (csv->transactions
+             (read-csv "example.csv"))))
