@@ -53,13 +53,13 @@
                  (string->number (string-replace (list-ref line 9) "$" "")))))
 
 (module+ test
-  (check-equal? (aggregate-outflow T1)
+  (check-equal? (aggregate-outflow transaction-group T1)
                 '(("G2" . 30.0) ("G1" . 10.0) ("G4" . 1.0))))
-(define (aggregate-outflow ts)
+(define (aggregate-outflow key ts)
   (sort
    (filter (λ (a) (> (cdr a) 0))
-           (for/list ([g (group-by transaction-group ts)])
-             (cons (transaction-group (first g))
+           (for/list ([g (group-by key ts)])
+             (cons (key (first g))
                    (for/sum ([t g]) (transaction-outflow t)))))
    >= #:key cdr))
 
@@ -86,7 +86,7 @@
 (define (report ts)
   (string-join
    (cons "*Top outflow transactions:*"
-         (for/list ([g (aggregate-outflow ts)])
+         (for/list ([g (aggregate-outflow transaction-group ts)])
            (format "- ~a = $~a" (car g) (cdr g))))
    "\n"))
 
