@@ -58,19 +58,19 @@
 (define (aggregate-outflow ts)
   (sort
    (filter (λ (a) (> (cdr a) 0))
-           (for/list ([g (group-by-transaction-group ts)])
+           (for/list ([g (group-by transaction-group ts)])
              (cons (transaction-group (first g))
                    (for/sum ([t g]) (transaction-outflow t)))))
    >= #:key cdr))
 
-(define (group-by-transaction-group ts)
+(define (group-by key ts)
   (for/fold ([groups '()]
              #:result (reverse groups))
-            ([t (sort ts string<=? #:key transaction-group)])
+            ([t (sort ts string<=? #:key key)])
     (cond
       [(empty? groups) (list (list t))]
-      [(equal? (transaction-group (first (first groups)))
-               (transaction-group t))
+      [(equal? (key (first (first groups)))
+               (key t))
        (cons (cons t (first groups))
              (rest groups))]
       [else
