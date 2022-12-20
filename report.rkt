@@ -26,10 +26,17 @@
 ;;     - G1: C1 = $300
 ;;     - G2: C1 = $80
 
+(struct transaction [group category outflow inflow] #:transparent)
+
 (define (read-csv path)
   (define content (port->string (open-input-file path)))
   (for/list ([line (string-split content "\n")])
     (for/list ([field (string-split line ",")])
       (string-replace (string-replace field "\"" "") "\r" ""))))
 
-(read-csv "example.csv")
+(define (csv->transactions csv)
+  (for/list ([line (rest csv)])
+    (transaction (list-ref line 5) (list-ref line 6) (list-ref line 8) (list-ref line 9))))
+
+(csv->transactions
+ (read-csv "example.csv"))
