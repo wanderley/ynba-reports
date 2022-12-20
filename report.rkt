@@ -77,17 +77,36 @@
        (cons (list t) groups)])))
 
 (module+ test
+  (check-equal? (aggregated-value->string '("C1" . 28.7))
+                "C1 = $28.7"))
+(define (aggregated-value->string a)
+  (format "~a = $~a" (car a) (cdr a)))
+
+(module+ test
   (check-equal? (report T1)
                 (string-join '("*Top outflow transactions:*"
                                "- G2 = $30.0"
+                               "  - C1 = $30.0"
                                "- G1 = $10.0"
-                               "- G4 = $1.0")
+                               "  - C1 = $10.0"
+                               "- G4 = $1.0"
+                               "  - C2 = $1.0")
                              "\n")))
 (define (report ts)
   (string-join
    (cons "*Top outflow transactions:*"
-         (for/list ([g (aggregate-outflow transaction-group ts)])
-           (format "- ~a = $~a" (car g) (cdr g))))
+         (for/list ([a (aggregate-outflow transaction-group ts)])
+           (format "- ~a\n~a"
+                   (aggregated-value->string a)
+                   (string-join
+                    (for/list ([a (aggregate-outflow
+                                   transaction-category
+                                   (filter (λ (t)
+                                             (equal? (transaction-group t)
+                                                     (car a)))
+                                           ts))])
+                      (format "  - ~a" (aggregated-value->string a)))
+                    "\n"))))
    "\n"))
 
 (displayln (report
