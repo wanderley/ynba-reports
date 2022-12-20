@@ -1,5 +1,31 @@
 #lang racket
 
+;; Given a list of transaction, print a report.
+;;
+;; Example of report:
+;;
+;;     *Maiores saídas:*
+;;     - G1 = $1000
+;;       - C1 = $300
+;;       - C2 = $600
+;;       - C3 = $80
+;;       - Outras = $20
+;;     - G2 = $1000
+;;       - C1 = $300
+;;       - C2 = $600
+;;       - C3 = $80
+;;       - Outras = $20
+;;     - G3 = $1000
+;;       - C1 = $300
+;;       - C2 = $600
+;;       - C3 = $80
+;;       - Outras = $20
+;;     - Outros = $1000
+;;
+;;     *Maiores entradas:*
+;;     - G1: C1 = $300
+;;     - G2: C1 = $80
+
 (define (read-csv path)
   (define content (port->string (open-input-file path)))
   (for/list ([line (string-split content "\n")])
