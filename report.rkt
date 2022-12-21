@@ -105,12 +105,25 @@
                                "- G1 = $10.0"
                                "  - C1 = $10.0"
                                "- G4 = $1.0"
+                               "  - C2 = $1.0"
+                               ""
+                               ""
+                               "*Inflow transactions:*"
+                               "- G3 = $7.0"
+                               "  - C1 = $7.0"
+                               "- G5 = $5.0"
+                               "  - C3 = $5.0"
+                               "- G4 = $1.0"
                                "  - C2 = $1.0")
                              "\n")))
 (define (report ts)
   (string-join
-   (cons "*Top outflow transactions:*"
-         (report-aggregation transaction-outflow ts))
+   `("*Top outflow transactions:*"
+     ,@(report-aggregation transaction-outflow ts)
+     ""
+     ""
+     "*Inflow transactions:*"
+     ,@(report-aggregation transaction-inflow ts))
    "\n"))
 
 (displayln (report
