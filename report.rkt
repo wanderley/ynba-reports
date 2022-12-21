@@ -37,7 +37,7 @@
                    (transaction "G4" "C2"  1.0 0.0)
                    (transaction "G4" "C2"  0.0 1.0)
                    (transaction "G5" "C3"  0.0 5.0)
-                   (transaction "G2" "C1" 15.0 0.0))))
+                   (transaction "G2" "C2" 15.0 0.0))))
 
 (define (read-csv path)
   (define content (port->string (open-input-file path)))
@@ -84,37 +84,39 @@
 
 (define (report-aggregation type ts)
   (for/list ([a (aggregate transaction-group type ts)])
-    (format "- ~a\n~a"
-            (aggregated-value->string a)
-            (string-join
-             (for/list ([a (aggregate
-                            transaction-category
-                            type
-                            (filter (λ (t)
-                                      (equal? (transaction-group t)
-                                              (car a)))
-                                    ts))])
-               (format "  - ~a" (aggregated-value->string a)))
-             "\n"))))
+    (let ([acs (aggregate
+               transaction-category
+               type
+               (filter (λ (t)
+                         (equal? (transaction-group t)
+                                 (car a)))
+                       ts))])
+      (cond
+        [(zero? (length acs)) '()]
+        [(= (length acs) 1)
+         (format "- ~a: ~a = $~a" (car a) (car (car acs)) (cdr (car acs)))]
+        [else
+         (format "- ~a\n~a"
+                 (aggregated-value->string a)
+                 (string-join
+                  (for/list ([a acs])
+                    (format "  - ~a" (aggregated-value->string a)))
+                  "\n"))]))))
 
 (module+ test
   (check-equal? (report T1)
                 (string-join '("*Top outflow transactions:*"
                                "- G2 = $30.0"
-                               "  - C1 = $30.0"
-                               "- G1 = $10.0"
-                               "  - C1 = $10.0"
-                               "- G4 = $1.0"
-                               "  - C2 = $1.0"
+                               "  - C2 = $15.0"
+                               "  - C1 = $15.0"
+                               "- G1: C1 = $10.0"
+                               "- G4: C2 = $1.0"
                                ""
                                ""
                                "*Inflow transactions:*"
-                               "- G3 = $7.0"
-                               "  - C1 = $7.0"
-                               "- G5 = $5.0"
-                               "  - C3 = $5.0"
-                               "- G4 = $1.0"
-                               "  - C2 = $1.0")
+                               "- G3: C1 = $7.0"
+                               "- G5: C3 = $5.0"
+                               "- G4: C2 = $1.0")
                              "\n")))
 (define (report ts)
   (string-join
