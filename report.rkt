@@ -82,6 +82,21 @@
 (define (aggregated-value->string a)
   (format "~a = $~a" (car a) (cdr a)))
 
+(define (report-aggregation type ts)
+  (for/list ([a (aggregate transaction-group type ts)])
+    (format "- ~a\n~a"
+            (aggregated-value->string a)
+            (string-join
+             (for/list ([a (aggregate
+                            transaction-category
+                            type
+                            (filter (λ (t)
+                                      (equal? (transaction-group t)
+                                              (car a)))
+                                    ts))])
+               (format "  - ~a" (aggregated-value->string a)))
+             "\n"))))
+
 (module+ test
   (check-equal? (report T1)
                 (string-join '("*Top outflow transactions:*"
@@ -95,19 +110,7 @@
 (define (report ts)
   (string-join
    (cons "*Top outflow transactions:*"
-         (for/list ([a (aggregate transaction-group transaction-outflow ts)])
-           (format "- ~a\n~a"
-                   (aggregated-value->string a)
-                   (string-join
-                    (for/list ([a (aggregate
-                                   transaction-category
-                                   transaction-outflow
-                                   (filter (λ (t)
-                                             (equal? (transaction-group t)
-                                                     (car a)))
-                                           ts))])
-                      (format "  - ~a" (aggregated-value->string a)))
-                    "\n"))))
+         (report-aggregation transaction-outflow ts))
    "\n"))
 
 (displayln (report
